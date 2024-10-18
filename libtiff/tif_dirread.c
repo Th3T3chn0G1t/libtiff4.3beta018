@@ -53,7 +53,9 @@ static	int TIFFFetchPerSampleAnys(TIFF*, TIFFDirEntry*, double*);
 static	int TIFFFetchShortArray(TIFF*, TIFFDirEntry*, uint16*);
 static	int TIFFFetchStripThing(TIFF*, TIFFDirEntry*, long, uint32**);
 static	int TIFFFetchExtraSamples(TIFF*, TIFFDirEntry*);
+#ifdef COLORIMETRY_SUPPORT
 static	int TIFFFetchRefBlackWhite(TIFF*, TIFFDirEntry*);
+#endif
 static	float TIFFFetchFloat(TIFF*, TIFFDirEntry*);
 static	int TIFFFetchFloatArray(TIFF*, TIFFDirEntry*, float*);
 static	int TIFFFetchDoubleArray(TIFF*, TIFFDirEntry*, double*);
@@ -95,6 +97,7 @@ TIFFReadDirectory(TIFF* tif)
 	int diroutoforderwarning = 0;
 
 	tif->tif_diroff = tif->tif_nextdiroff;
+
 	if (tif->tif_diroff == 0)		/* no more directories */
 		return (0);
 	/*

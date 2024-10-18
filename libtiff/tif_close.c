@@ -30,7 +30,7 @@
 #include "tiffiop.h"
 
 void
-TIFFClose(TIFF* tif)
+TIFFClose(TIFF* tif, int close_file)
 {
 	if (tif->tif_mode != O_RDONLY)
 		/*
@@ -44,7 +44,7 @@ TIFFClose(TIFF* tif)
 		_TIFFfree(tif->tif_rawdata);
 	if (isMapped(tif))
 		TIFFUnmapFileContents(tif, tif->tif_base, tif->tif_size);
-	(void) TIFFCloseFile(tif);
+	if(close_file) (void) TIFFCloseFile(tif);
 	if (tif->tif_fieldinfo)
 		_TIFFfree(tif->tif_fieldinfo);
 	_TIFFfree(tif);

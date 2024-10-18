@@ -62,6 +62,7 @@
 #define	HOST_BIGENDIAN	1
 #endif
 
+#define FEATURE_SUPPORT
 #ifndef FEATURE_SUPPORT
 /*
  * Feature support definitions:
@@ -75,6 +76,7 @@
 #define	CMYK_SUPPORT
 #endif /* FEATURE_SUPPORT */
 
+#define COMPRESSION_SUPPORT
 #ifndef COMPRESSION_SUPPORT
 /*
  * Compression support defines:

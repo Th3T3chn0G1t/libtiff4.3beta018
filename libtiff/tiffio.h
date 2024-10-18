@@ -202,7 +202,7 @@ extern	void _TIFFmemcpy(tdata_t, const tdata_t, tsize_t);
 extern	int _TIFFmemcmp(const tdata_t, const tdata_t, tsize_t);
 extern	void _TIFFfree(tdata_t);
 
-extern	void TIFFClose(TIFF*);
+extern	void TIFFClose(TIFF*, int);
 extern	int TIFFFlush(TIFF*);
 extern	int TIFFFlushData(TIFF*);
 extern	int TIFFGetField(TIFF*, ttag_t, ...);

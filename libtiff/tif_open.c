@@ -149,6 +149,8 @@ TIFFClientOpen(
 	static const char module[] = "TIFFClientOpen";
 	TIFF *tif;
 	int m, bigendian;
+	char scratch[8];
+	char* p = scratch;
 
 	m = _TIFFgetMode(mode, module);
 	if (m == -1)
@@ -199,7 +201,7 @@ TIFFClientOpen(
 	/*
 	 * Read in TIFF header.
 	 */
-	if (!ReadOK(tif, &tif->tif_header, sizeof (TIFFHeader))) {
+	if (!ReadOK(tif, scratch, sizeof (scratch))) {
 		if (tif->tif_mode == O_RDONLY) {
 			TIFFError(name, "Cannot read TIFF header");
 			goto bad;
@@ -228,6 +230,14 @@ TIFFClientOpen(
 		tif->tif_diroff = 0;
 		return (tif);
 	}
+
+	/* NOTE: Reassemble header without having access to attrib. packed. */
+	memcpy(&tif->tif_header.tiff_magic, p, sizeof(uint16));
+	p += sizeof(uint16);
+	memcpy(&tif->tif_header.tiff_version, p, sizeof(uint16));
+	p += sizeof(uint16);
+	memcpy(&tif->tif_header.tiff_diroff, p, sizeof(uint32));
+
 	/*
 	 * Setup the byte order handling.
 	 */
@@ -287,7 +297,7 @@ TIFFClientOpen(
 	}
 bad:
 	tif->tif_mode = O_RDONLY;	/* XXX avoid flush */
-	TIFFClose(tif);
+	TIFFClose(tif, 1);
 	return ((TIFF*)0);
 bad2:
 	(void) (*closeproc)(clientdata);

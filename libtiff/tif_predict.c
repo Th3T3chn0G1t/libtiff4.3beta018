@@ -184,8 +184,8 @@ horAcc8(TIFF* tif, tidata_t cp0, tsize_t cc)
 	u_int stride = sp->stride;
 
 	char* cp = (char*) cp0;
-	if (cc > stride) {
-		cc -= stride;
+	if (cc > (int) stride) {
+		cc -= (int) stride;
 		/*
 		 * Pipeline the most common cases.
 		 */
@@ -228,12 +228,12 @@ swabHorAcc16(TIFF* tif, tidata_t cp0, tsize_t cc)
 	uint16* wp = (uint16*) cp0;
 	tsize_t wc = cc / 2;
 
-	if (wc > stride) {
+	if (wc > (int) stride) {
 		TIFFSwabArrayOfShort(wp, wc);
-		wc -= stride;
+		wc -= (int) stride;
 		do {
 			REPEAT4(stride, wp[stride] += wp[0]; wp++)
-			wc -= stride;
+			wc -= (int) stride;
 		} while ((int32) wc > 0);
 	}
 }
@@ -245,11 +245,11 @@ horAcc16(TIFF* tif, tidata_t cp0, tsize_t cc)
 	uint16* wp = (uint16*) cp0;
 	tsize_t wc = cc / 2;
 
-	if (wc > stride) {
-		wc -= stride;
+	if (wc > (int) stride) {
+		wc -= (int) stride;
 		do {
 			REPEAT4(stride, wp[stride] += wp[0]; wp++)
-			wc -= stride;
+			wc -= (int) stride;
 		} while ((int32) wc > 0);
 	}
 }
@@ -307,8 +307,8 @@ horDiff8(TIFF* tif, tidata_t cp0, tsize_t cc)
 	u_int stride = sp->stride;
 	char* cp = (char*) cp0;
 
-	if (cc > stride) {
-		cc -= stride;
+	if (cc > (int) stride) {
+		cc -= (int) stride;
 		/*
 		 * Pipeline the most common cases.
 		 */
@@ -353,12 +353,12 @@ horDiff16(TIFF* tif, tidata_t cp0, tsize_t cc)
 	int16 *wp = (int16*) cp0;
 	tsize_t wc = cc/2;
 
-	if (wc > stride) {
-		wc -= stride;
+	if (wc > (int) stride) {
+		wc -= (int) stride;
 		wp += wc - 1;
 		do {
 			REPEAT4(stride, wp[stride] -= wp[0]; wp--)
-			wc -= stride;
+			wc -= (int) stride;
 		} while ((int32) wc > 0);
 	}
 }

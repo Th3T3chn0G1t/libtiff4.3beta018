@@ -952,7 +952,7 @@ TIFFLinkDirectory(TIFF* tif)
 		 * First directory, overwrite offset in header.
 		 */
 		tif->tif_header.tiff_diroff = diroff;
-#define	HDROFF(f)	((toff_t) &(((TIFFHeader*) 0)->f))
+#define	HDROFF(f)	((toff_t) (u_long) &(((TIFFHeader*) 0)->f))
 		(void) TIFFSeekFile(tif, HDROFF(tiff_diroff), SEEK_SET);
 		if (!WriteOK(tif, &diroff, sizeof (diroff))) {
 			TIFFError(tif->tif_name, "Error writing TIFF header");

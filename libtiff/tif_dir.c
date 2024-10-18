@@ -88,7 +88,7 @@ _TIFFVSetField(TIFF* tif, ttag_t tag, va_list ap)
 	TIFFDirectory* td = &tif->tif_dir;
 	int status = 1;
 	uint32 v32;
-	int i, v;
+	int v;
 
 	switch (tag) {
 	case TIFFTAG_SUBFILETYPE:
