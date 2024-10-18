@@ -454,6 +454,8 @@ if [ -z "$GCOPTS" ]; then
 	    Note "... but not together with the -O option, not using it."
 	fi
     }
+
+    GCOPTS="$GCOPTS -DHAS_CONFIGURE"
 fi
 if [ "$GCOPTS" ]; then
     Note "Using \"$GCOPTS\" for C compiler options."
@@ -809,6 +811,8 @@ BuildPortDotH()
 
     (EmitCPlusPlusPrologue _PORT_
 
+    # TODO: Should we conditionally ask for this?
+    echo "#define _DEFAULT_SOURCE"
     CheckForIncludeFile sys/types.h && echo '#include <sys/types.h>'
     CheckVarDecl mode_t 'typedef int mode_t;' sys/types.h stdlib.h
     CheckVarDecl off_t 'typedef long off_t;' sys/types.h stdlib.h
