@@ -454,8 +454,6 @@ if [ -z "$GCOPTS" ]; then
 	    Note "... but not together with the -O option, not using it."
 	fi
     }
-
-    GCOPTS="$GCOPTS -DHAS_CONFIGURE"
 fi
 if [ "$GCOPTS" ]; then
     Note "Using \"$GCOPTS\" for C compiler options."
