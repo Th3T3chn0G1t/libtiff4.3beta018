@@ -72,7 +72,7 @@ TIFFPrintDirectory(TIFF* tif, FILE* fd, long flags)
 	uint16 i;
 	long l, n;
 
-	fprintf(fd, "TIFF Directory at offset 0x%x\n", tif->tif_diroff);
+	fprintf(fd, "TIFF Directory at offset 0x%lx\n", tif->tif_diroff);
 	td = &tif->tif_dir;
 	if (TIFFFieldSet(tif,FIELD_SUBFILETYPE)) {
 		fprintf(fd, "  Subfile Type:");
@@ -87,7 +87,7 @@ TIFFPrintDirectory(TIFF* tif, FILE* fd, long flags)
 		}
 		if (td->td_subfiletype & FILETYPE_MASK)
 			fprintf(fd, "%stransparency mask", sep);
-		fprintf(fd, " (%u = 0x%x)\n",
+		fprintf(fd, " (%lu = 0x%lx)\n",
 		    td->td_subfiletype, td->td_subfiletype);
 	}
 	if (TIFFFieldSet(tif,FIELD_IMAGEDIMENSIONS)) {
@@ -441,7 +441,7 @@ TIFFPrintDirectory(TIFF* tif, FILE* fd, long flags)
 	if (TIFFFieldSet(tif, FIELD_SUBIFD)) {
 		fprintf(fd, "  SubIFD Offsets:");
 		for (i = 0; i < td->td_nsubifd; i++)
-			fprintf(fd, " %5u", td->td_subifd[i]);
+			fprintf(fd, " %5lu", td->td_subifd[i]);
 		fputc('\n', fd);
 	}
 #endif
@@ -451,7 +451,7 @@ TIFFPrintDirectory(TIFF* tif, FILE* fd, long flags)
 	    TIFFFieldSet(tif,FIELD_STRIPOFFSETS)) {
 		tstrip_t s;
 
-		fprintf(fd, "  %u %s:\n",
+		fprintf(fd, "  %lu %s:\n",
 		    td->td_nstrips,
 		    isTiled(tif) ? "Tiles" : "Strips");
 		for (s = 0; s < td->td_nstrips; s++)

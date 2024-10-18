@@ -594,11 +594,20 @@ gtStripSeparate(TIFFRGBAImage* img, uint32* raster, uint32 w, uint32 h)
 #define	REPEAT2(op)	op; op
 #define	CASE8(x,op)			\
     switch (x) {			\
-    case 7: op; case 6: op; case 5: op;	\
-    case 4: op; case 3: op; case 2: op;	\
+    case 7: op; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 6: op; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 5: op; FALLTHROUGH; /* FALLTHROUGH */ \
+    case 4: op; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 3: op; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 2: op; FALLTHROUGH; /* FALLTHROUGH */ \
     case 1: op;				\
     }
-#define	CASE4(x,op)	switch (x) { case 3: op; case 2: op; case 1: op; }
+#define	CASE4(x,op) \
+	switch (x) { \
+	case 3: op; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 2: op; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 1: op; \
+	}
 #define	NOP
 
 #define	UNROLL8(w, op1, op2) {		\

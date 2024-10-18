@@ -233,7 +233,7 @@ tagCompare(const void* a, const void* b)
 	const TIFFFieldInfo* ta = *(const TIFFFieldInfo**) a;
 	const TIFFFieldInfo* tb = *(const TIFFFieldInfo**) b;
  	int c = ta->field_tag - tb->field_tag;
-	return (c != 0 ? c : tb->field_type - ta->field_type);
+	return (c != 0 ? (unsigned) c : tb->field_type - ta->field_type);
 }
 
 void

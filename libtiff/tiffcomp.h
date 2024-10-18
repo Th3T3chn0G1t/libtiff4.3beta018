@@ -39,32 +39,38 @@
  * Setup basic type definitions and function declaratations.
  */
 #if defined(__MWERKS__) || defined(THINK_C)
-#include <unix.h>
-#include <math.h>
+# include <unix.h>
+# include <math.h>
 #endif
+
 #include <stdio.h>
+
 #ifdef applec
-#include <types.h>
+# include <types.h>
+#elif !defined(__MWERKS__) && !defined(THINK_C) && defined(_DEFAULT_SOURCE)
+# include <sys/types.h>
 #else
-#if !defined(__MWERKS__) && !defined(THINK_C)
-#include <sys/types.h>
+# define BSDTYPES
 #endif
-#endif
+
 #ifdef VMS
-#include <file.h>
-#include <unixio.h>
+# include <file.h>
+# include <unixio.h>
 #else
-#include <fcntl.h>
+# include <fcntl.h>
 #endif
+
 #if defined(__MWERKS__) || defined(THINK_C) || defined(applec)
-#include <stdlib.h>
-#define	BSDTYPES
+# include <stdlib.h>
+# define	BSDTYPES
 #endif
+
 #if defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows)
-#define	BSDTYPES
+# define	BSDTYPES
 #endif
+
 #if defined(OS2_16) || defined(OS2_32)
-#define	BSDTYPES
+# define	BSDTYPES
 #endif
 
 /*
@@ -121,6 +127,12 @@ typedef double dblparam_t;
 #endif
 #else /* !__GNUC__ */
 #define	INLINE
+#endif
+
+#ifdef __has_attribute
+# if __has_attribute(fallthrough)
+#  define FALLTHROUGH __attribute__((fallthrough))
+# endif
 #endif
 
 /*

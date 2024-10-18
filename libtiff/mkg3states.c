@@ -331,7 +331,7 @@ static	char* storage_class = "";
 static	char* const_class = "";
 static	int packoutput = 1;
 
-WriteTable(FILE* fd, const TIFFFaxTabEnt* T, int Size, const char* name)
+void WriteTable(FILE* fd, const TIFFFaxTabEnt* T, int Size, const char* name)
 {
     int i;
     char* sep;
@@ -341,11 +341,11 @@ WriteTable(FILE* fd, const TIFFFaxTabEnt* T, int Size, const char* name)
     if (packoutput) {
 	sep = "\n";
 	for (i = 0; i < Size; i++) {
-	    fprintf(fd, "%s%d,%d,%d", sep, T->State, T->Width, T->Param);
+	    fprintf(fd, "%s{ %d, %d, %d }", sep, T->State, T->Width, T->Param);
 	    if (((i+1) % 12) == 0)
 		    sep = ",\n";
 	    else
-		    sep = ",";
+		    sep = ", ";
 	    T++;
 	}
     } else {
@@ -363,7 +363,7 @@ WriteTable(FILE* fd, const TIFFFaxTabEnt* T, int Size, const char* name)
 }
 
 /* initialise the huffman code tables */
-main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     FILE* fd;
     char* outputfile;

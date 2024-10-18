@@ -71,7 +71,7 @@ TIFFComputeTile(TIFF* tif, uint32 x, uint32 y, uint32 z, tsample_t s)
  * Check an (x,y,z,s) coordinate
  * against the image bounds.
  */
-TIFFCheckTile(TIFF* tif, uint32 x, uint32 y, uint32 z, tsample_t s)
+int TIFFCheckTile(TIFF* tif, uint32 x, uint32 y, uint32 z, tsample_t s)
 {
 	TIFFDirectory *td = &tif->tif_dir;
 

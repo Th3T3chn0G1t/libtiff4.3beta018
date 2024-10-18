@@ -338,15 +338,31 @@ Fax3Decode2D(TIFF* tif, tidata_t buf, tsize_t occ, tsample_t s)
 #else
 #define FILL(n, cp)							    \
     switch (n) {							    \
-    case 7: (cp)[6] = 0xff; case 6: (cp)[5] = 0xff; case 5: (cp)[4] = 0xff; \
-    case 4: (cp)[3] = 0xff; case 3: (cp)[2] = 0xff; case 2: (cp)[1] = 0xff; \
-    case 1: (cp)[0] = 0xff; (cp) += (n); case 0:  ;			    \
+    case 7: (cp)[6] = 0xff; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 6: (cp)[5] = 0xff; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 5: (cp)[4] = 0xff; FALLTHROUGH; /* FALLTHROUGH */ \
+    case 4: (cp)[3] = 0xff; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 3: (cp)[2] = 0xff; FALLTHROUGH; /* FALLTHROUGH */ \
+	case 2: (cp)[1] = 0xff; FALLTHROUGH; /* FALLTHROUGH */ \
+    case 1: (cp)[0] = 0xff; \
+		(cp) += (n); \
+		FALLTHROUGH; \
+		/* FALLTHROUGH */ \
+	case 0: break; \
     }
 #define ZERO(n, cp)							\
     switch (n) {							\
-    case 7: (cp)[6] = 0; case 6: (cp)[5] = 0; case 5: (cp)[4] = 0;	\
-    case 4: (cp)[3] = 0; case 3: (cp)[2] = 0; case 2: (cp)[1] = 0;	\
-    case 1: (cp)[0] = 0; (cp) += (n); case 0:  ;			\
+    case 7: (cp)[6] = 0;  FALLTHROUGH; /* FALLTHROUGH */ \
+	case 6: (cp)[5] = 0;  FALLTHROUGH; /* FALLTHROUGH */ \
+	case 5: (cp)[4] = 0;  FALLTHROUGH; /* FALLTHROUGH */ \
+    case 4: (cp)[3] = 0;  FALLTHROUGH; /* FALLTHROUGH */ \
+	case 3: (cp)[2] = 0;  FALLTHROUGH; /* FALLTHROUGH */ \
+	case 2: (cp)[1] = 0;  FALLTHROUGH; /* FALLTHROUGH */ \
+    case 1: (cp)[0] = 0; \
+		(cp) += (n); \
+		FALLTHROUGH; \
+		/* FALLTHROUGH */ \
+	case 0: ; \
     }
 #endif
 
@@ -379,7 +395,7 @@ _TIFFFax3fillruns(u_char* buf, uint16* runs, uint16* erun, uint32 lastx)
 			*cp++ &= 0xff << (8-bx);
 			run -= 8-bx;
 		    }
-		    if (n = run >> 3) {		/* multiple bytes to fill */
+		    if ((n = run >> 3)) {		/* multiple bytes to fill */
 			if ((n/sizeof (long)) > 1) {
 			    /*
 			     * Align to longword boundary and fill.
@@ -418,7 +434,7 @@ _TIFFFax3fillruns(u_char* buf, uint16* runs, uint16* erun, uint32 lastx)
 			*cp++ |= 0xff >> bx;
 			run -= 8-bx;
 		    }
-		    if (n = run>>3) {		/* multiple bytes to fill */
+		    if ((n = run>>3)) {		/* multiple bytes to fill */
 			if ((n/sizeof (long)) > 1) {
 			    /*
 			     * Align to longword boundary and fill.
@@ -494,7 +510,7 @@ Fax3SetupState(TIFF* tif)
 	if (tif->tif_mode == O_RDONLY) {	/* 1d/2d decoding */
 		Fax3DecodeState* dsp = DecoderState(tif);
 		uint32 nruns = needsRefLine ?
-		     2*TIFFroundup(rowpixels,32) : rowpixels;
+		     2*TIFFroundup(rowpixels,32) : (uint32) rowpixels;
 
 		dsp->runs = (uint16*) _TIFFmalloc(nruns*sizeof (uint16));
 		if (dsp->runs == NULL) {
@@ -555,15 +571,15 @@ Fax3SetupState(TIFF* tif)
 static const int _msbmask[9] =
     { 0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff };
 #define	_PutBits(tif, bits, length) {				\
-	while (length > bit) {					\
-		data |= bits >> (length - bit);			\
-		length -= bit;					\
-		_FlushBits(tif);				\
+	while ((u_int) (length) > (u_int) (bit)) {					\
+		data |= (bits) >> ((length) - bit);			\
+		(length) -= bit;					\
+		_FlushBits((tif));				\
 	}							\
-	data |= (bits & _msbmask[length]) << (bit - length);	\
-	bit -= length;						\
+	data |= ((bits) & _msbmask[length]) << (bit - (length));	\
+	bit -= (length);						\
 	if (bit == 0)						\
-		_FlushBits(tif);				\
+		_FlushBits((tif));				\
 }
 	
 /*
@@ -777,7 +793,7 @@ find0span(u_char* bp, int32 bs, int32 be)
 		bp++;
 	} else
 		span = 0;
-	if (bits >= 2*8*sizeof (long)) {
+	if ((size_t) bits >= 2 * 8 * sizeof (long)) {
 		long* lp;
 		/*
 		 * Align to longword boundary and check longwords.
@@ -789,7 +805,7 @@ find0span(u_char* bp, int32 bs, int32 be)
 			bp++;
 		}
 		lp = (long*) bp;
-		while (bits >= 8*sizeof (long) && *lp == 0) {
+		while ((size_t) bits >= 8*sizeof (long) && *lp == 0) {
 			span += 8*sizeof (long), bits -= 8*sizeof (long);
 			lp++;
 		}
@@ -836,7 +852,7 @@ find1span(u_char* bp, int32 bs, int32 be)
 		bp++;
 	} else
 		span = 0;
-	if (bits >= 2*8*sizeof (long)) {
+	if ((size_t) bits >= 2*8*sizeof (long)) {
 		long* lp;
 		/*
 		 * Align to longword boundary and check longwords.
@@ -848,7 +864,7 @@ find1span(u_char* bp, int32 bs, int32 be)
 			bp++;
 		}
 		lp = (long*) bp;
-		while (bits >= 8*sizeof (long) && *lp == ~0) {
+		while ((size_t) bits >= 8*sizeof (long) && *lp == ~0) {
 			span += 8*sizeof (long), bits -= 8*sizeof (long);
 			lp++;
 		}
@@ -886,7 +902,7 @@ find1span(u_char* bp, int32 bs, int32 be)
  * against the end in case start > end.
  */
 #define	finddiff2(_cp, _bs, _be, _color) \
-	(_bs < _be ? finddiff(_cp,_bs,_be,_color) : _be)
+	((int32) (_bs) < (int32) (_be) ? (int32) finddiff(_cp,_bs,_be,_color) : (int32) (_be))
 
 /*
  * 1d-encode a row of pixels.  The encoding is
@@ -903,12 +919,12 @@ Fax3Encode1DRow(TIFF* tif, u_char* bp, uint32 bits)
 		span = find0span(bp, bs, bits);		/* white span */
 		putspan(tif, span, TIFFFaxWhiteCodes);
 		bs += span;
-		if (bs >= bits)
+		if (bs >= (int32) bits)
 			break;
 		span = find1span(bp, bs, bits);		/* black span */
 		putspan(tif, span, TIFFFaxBlackCodes);
 		bs += span;
-		if (bs >= bits)
+		if (bs >= (int32) bits)
 			break;
 	}
 	if (sp->b.mode & (FAXMODE_BYTEALIGN|FAXMODE_WORDALIGN)) {
@@ -922,17 +938,17 @@ Fax3Encode1DRow(TIFF* tif, u_char* bp, uint32 bits)
 }
 
 static const tableentry horizcode =
-    { 3, 0x1 };		/* 001 */
+    { 3, 0x1, 0 };		/* 001 */
 static const tableentry passcode =
-    { 4, 0x1 };		/* 0001 */
+    { 4, 0x1, 0 };		/* 0001 */
 static const tableentry vcodes[7] = {
-    { 7, 0x03 },	/* 0000 011 */
-    { 6, 0x03 },	/* 0000 11 */
-    { 3, 0x03 },	/* 011 */
-    { 1, 0x1 },		/* 1 */
-    { 3, 0x2 },		/* 010 */
-    { 6, 0x02 },	/* 0000 10 */
-    { 7, 0x02 }		/* 0000 010 */
+    { 7, 0x03, 0 },	/* 0000 011 */
+    { 6, 0x03, 0 },	/* 0000 11 */
+    { 3, 0x03, 0 },	/* 011 */
+    { 1, 0x1, 0 },		/* 1 */
+    { 3, 0x2, 0 },		/* 010 */
+    { 6, 0x02, 0 },	/* 0000 10 */
+    { 7, 0x02, 0 }		/* 0000 010 */
 };
 
 /*
@@ -971,7 +987,7 @@ Fax3Encode2DRow(TIFF* tif, u_char* bp, u_char* rp, uint32 bits)
 			putcode(tif, &passcode);
 			a0 = b2;
 		}
-		if (a0 >= bits)
+		if ((uint32) a0 >= bits)
 			break;
 		a1 = finddiff(bp, a0, bits, PIXEL(bp,a0));
 		b1 = finddiff(rp, a0, bits, !PIXEL(bp,a0));

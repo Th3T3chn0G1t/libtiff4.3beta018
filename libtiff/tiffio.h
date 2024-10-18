@@ -65,6 +65,8 @@ typedef	int32 tsize_t;		/* i/o size in bytes */
 #if defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows)
 #include <windows.h>
 typedef	HFILE thandle_t;	/* client data handle */
+#elif defined(unix) || defined(__unix)
+typedef	int thandle_t;	/* client data handle */
 #else
 typedef	void* thandle_t;	/* client data handle */
 #endif

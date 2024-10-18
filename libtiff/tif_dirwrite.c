@@ -375,6 +375,7 @@ TIFFWriteNormalTag(TIFF* tif, TIFFDirEntry* dir, const TIFFFieldInfo* fip)
 	dir->tdir_count = wc;
 #define	WRITEF(x,y)	x(tif, fip->field_type, fip->field_tag, dir, wc, y)
 	switch (fip->field_type) {
+	default: break;
 	case TIFF_SHORT:
 	case TIFF_SSHORT:
 		if (wc > 1) {
@@ -526,7 +527,7 @@ TIFFWritePerSampleShorts(TIFF* tif, ttag_t tag, TIFFDirEntry* dir)
 	uint16* w = buf;
 	int i, status, samples = tif->tif_dir.td_samplesperpixel;
 
-	if (samples > NITEMS(buf))
+	if ((size_t) samples > NITEMS(buf))
 		w = (uint16*) _TIFFmalloc(samples * sizeof (uint16));
 	TIFFGetField(tif, tag, &v);
 	for (i = 0; i < samples; i++)
@@ -551,7 +552,7 @@ TIFFWritePerSampleAnys(TIFF* tif,
 	int i, status;
 	int samples = (int) tif->tif_dir.td_samplesperpixel;
 
-	if (samples > NITEMS(buf))
+	if ((size_t) samples > NITEMS(buf))
 		w = (double*) _TIFFmalloc(samples * sizeof (double));
 	TIFFGetField(tif, tag, &v);
 	for (i = 0; i < samples; i++)
@@ -742,7 +743,8 @@ TIFFWriteAnyArray(TIFF* tif,
 {
 	char buf[10 * sizeof(double)];
 	char* w = buf;
-	int i, status = 0;
+	unsigned i;
+	int status = 0;
 
 	if (n * tiffDataWidth[type] > sizeof buf)
 		w = (char*) _TIFFmalloc(n * tiffDataWidth[type]);
@@ -842,9 +844,27 @@ TIFFWriteTransferFunction(TIFF* tif, TIFFDirEntry* dir)
 	 * a single column of data won't suffice--hmm.
 	 */
 	switch (td->td_samplesperpixel - td->td_extrasamples) {
-	default:	if (_TIFFmemcmp(tf[0], tf[2], n)) { ncols = 3; break; }
-	case 2:		if (_TIFFmemcmp(tf[0], tf[1], n)) { ncols = 3; break; }
-	case 1: case 0:	ncols = 1;
+	default: {
+		if (_TIFFmemcmp(tf[0], tf[2], n)) {
+			ncols = 3;
+			break;
+		}
+
+		FALLTHROUGH;
+	}
+	/* FALLTHROUGH */
+	case 2: {
+		if (_TIFFmemcmp(tf[0], tf[1], n)) {
+			ncols = 3;
+			break;
+		}
+
+		FALLTHROUGH;
+	}
+	/* FALLTHROUGH */
+	case 1: { FALLTHROUGH; }
+	/* FALLTHROUGH */
+	case 0:	ncols = 1;
 	}
 	return (TIFFWriteShortTable(tif,
 	    TIFFTAG_TRANSFERFUNCTION, dir, ncols, tf));

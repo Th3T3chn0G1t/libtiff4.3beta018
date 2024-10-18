@@ -148,19 +148,33 @@ PredictorSetupEncode(TIFF* tif)
 
 #define REPEAT4(n, op)		\
     switch (n) {		\
-    default: { int i; for (i = n-4; i > 0; i--) { op; } } \
-    case 4:  op;		\
-    case 3:  op;		\
-    case 2:  op;		\
-    case 1:  op;		\
+    default: {          \
+		int i;                \
+		for (i = n-4; i > 0; i--) { \
+			op;                  \
+		}                     \
+		FALLTHROUGH; \
+	} \
+	/* FALLTHROUGH */ \
+    case 4:  op; FALLTHROUGH; /* FALLTHROUGH */ \
+    case 3:  op; FALLTHROUGH; /* FALLTHROUGH */ \
+    case 2:  op; FALLTHROUGH; /* FALLTHROUGH */ \
+    case 1:  op; FALLTHROUGH; /* FALLTHROUGH */ \
     case 0:  ;			\
     }
 #define XREPEAT4(n, op)		\
     switch (n) {		\
-    default: { int i; for (i = n-4; i > 0; i--) { op; } } \
-    case 2:  op;		\
-    case 1:  op;		\
-    case 0:  ;			\
+    default: {           \
+		int i;                 \
+		for (i = n-4; i > 0; i--) { \
+			op;                   \
+		}                      \
+		FALLTHROUGH;           \
+		/* FALLTHROUGH */      \
+	}  \
+    case 2: op; FALLTHROUGH; /* FALLTHROUGH */ 		\
+    case 1: op; FALLTHROUGH; /* FALLTHROUGH */ 		\
+    case 0: ;			\
     }
 
 static void

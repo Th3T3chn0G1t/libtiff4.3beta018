@@ -318,7 +318,7 @@ TIFFWriteEncodedTile(TIFF* tif, ttile_t tile, tdata_t data, tsize_t cc)
 	 * done so that callers can pass in some large number
 	 * (e.g. -1) and have the tile size used instead.
 	 */
-	if ((uint32) cc > tif->tif_tilesize)
+	if ((tsize_t) cc > tif->tif_tilesize)
 		cc = tif->tif_tilesize;
 	if (!(*tif->tif_encodetile)(tif, (tidata_t) data, cc, sample))
 		return ((tsize_t) 0);
