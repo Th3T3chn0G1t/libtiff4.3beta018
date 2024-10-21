@@ -1131,7 +1131,7 @@ DECLARESepPutFunc(putRGBUAseparate16bittile)
 
     (void) img; (void) y;
     while (h-- > 0) {
-	uint32 r,g,b,a;
+	uint32 rp,gp,bp,ap;
 	/*
 	 * We shift alpha down four bits just in case unsigned
 	 * arithmetic doesn't handle the full range.
@@ -1141,11 +1141,11 @@ DECLARESepPutFunc(putRGBUAseparate16bittile)
 	 * we divide by (0xffff * 0xfff) / 0xff == 0x10eff.
 	 */
 	for (x = w; x-- > 0;) {
-	    a = *wa++ >> 4; 
-	    r = (*wr++ * a) / 0x10eff;
-	    g = (*wg++ * a) / 0x10eff;
-	    b = (*wb++ * a) / 0x10eff;
-	    *cp++ = PACK4(r,g,b,a);
+	    ap = *wa++ >> 4;
+	    rp = (*wr++ * ap) / 0x10eff;
+	    gp = (*wg++ * ap) / 0x10eff;
+	    bp = (*wb++ * ap) / 0x10eff;
+	    *cp++ = PACK4(rp,gp,bp,ap);
 	}
 	SKEW4(wr, wg, wb, wa, fromskew);
 	cp += toskew;
@@ -1396,7 +1396,7 @@ TIFFYCbCrToRGBInit(TIFFYCbCrToRGB* ycbcr, TIFF* tif)
     _TIFFmemset(clamptab, 0, 256);		/* v < 0 => 0 */
     ycbcr->clamptab = (clamptab += 256);
     for (i = 0; i < 256; i++)
-	clamptab[i] = i;
+	clamptab[i] = (TIFFRGBValue) i;
     _TIFFmemset(clamptab+256, 255, 2*256);	/* v > 255 => 255 */
     TIFFGetFieldDefaulted(tif, TIFFTAG_YCBCRCOEFFICIENTS, &coeffs);
     _TIFFmemcpy(ycbcr->coeffs, coeffs, 3*sizeof (float));
@@ -1555,10 +1555,10 @@ setupMap(TIFFRGBAImage* img)
     }
     if (img->photometric == PHOTOMETRIC_MINISWHITE) {
 	for (x = 0; x <= range; x++)
-	    img->Map[x] = ((range - x) * 255) / range;
+	    img->Map[x] = (TIFFRGBValue) (((range - x) * 255) / range);
     } else {
 	for (x = 0; x <= range; x++)
-	    img->Map[x] = (x * 255) / range;
+	    img->Map[x] = (TIFFRGBValue) ((x * 255) / range);
     }
     if (img->bitspersample <= 8 &&
 	(img->photometric == PHOTOMETRIC_MINISBLACK ||
@@ -1634,7 +1634,9 @@ makecmap(TIFFRGBAImage* img)
     for (i = 0; i < 256; i++) {
 	TIFFRGBValue c;
 	img->PALmap[i] = p;
-#define	CMAP(x)	c = x; *p++ = PACK(r[c]&0xff, g[c]&0xff, b[c]&0xff);
+#define	CMAP(x)	\
+			c = (TIFFRGBValue) x; \
+			*p++ = PACK(r[c]&0xff, g[c]&0xff, b[c]&0xff);
 	switch (bitspersample) {
 	case 1:
 	    CMAP(i>>7);

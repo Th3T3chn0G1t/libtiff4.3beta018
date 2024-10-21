@@ -62,7 +62,10 @@ typedef	uint16 tsample_t;	/* sample number */
 typedef	uint32 tstrip_t;	/* strip number */
 typedef uint32 ttile_t;		/* tile number */
 typedef	int32 tsize_t;		/* i/o size in bytes */
-#if defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows)
+#if defined(_WINDOWS) || \
+		defined(__WIN32__) ||  \
+		defined(_Windows) ||   \
+		defined(_WIN32)
 #include <windows.h>
 typedef	HFILE thandle_t;	/* client data handle */
 #elif defined(unix) || defined(__unix)

@@ -87,7 +87,7 @@ TIFFCodec _TIFFBuiltinCODECS[] = {
 static int
 NotConfigured(TIFF* tif, int scheme)
 {
-	const TIFFCodec* c = TIFFFindCODEC(scheme);
+	const TIFFCodec* c = TIFFFindCODEC((uint16) scheme);
 	
 	TIFFError(tif->tif_name,
 	    "%s compression support is not configured", c->name);

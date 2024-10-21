@@ -136,7 +136,7 @@ _TIFFVSetField(TIFF* tif, ttag_t tag, va_list ap)
 		 * Setup new compression routine state.
 		 */
 		if ((status = TIFFSetCompressionScheme(tif, v)))
-			td->td_compression = v;
+			td->td_compression = (uint16) v;
 		break;
 	case TIFFTAG_PHOTOMETRIC:
 		td->td_photometric = (uint16) va_arg(ap, int);

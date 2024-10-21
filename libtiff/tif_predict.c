@@ -195,9 +195,9 @@ horAcc8(TIFF* tif, tidata_t cp0, tsize_t cc)
 			u_int cb = cp[2];
 			do {
 				cc -= 3, cp += 3;
-				cp[0] = (cr += cp[0]);
-				cp[1] = (cg += cp[1]);
-				cp[2] = (cb += cp[2]);
+				cp[0] = (char) (cr += cp[0]);
+				cp[1] = (char) (cg += cp[1]);
+				cp[2] = (char) (cb += cp[2]);
 			} while ((int32) cc > 0);
 		} else if (stride == 4)  {
 			u_int cr = cp[0];
@@ -206,10 +206,10 @@ horAcc8(TIFF* tif, tidata_t cp0, tsize_t cc)
 			u_int ca = cp[3];
 			do {
 				cc -= 4, cp += 4;
-				cp[0] = (cr += cp[0]);
-				cp[1] = (cg += cp[1]);
-				cp[2] = (cb += cp[2]);
-				cp[3] = (ca += cp[3]);
+				cp[0] = (char) (cr += cp[0]);
+				cp[1] = (char) (cg += cp[1]);
+				cp[2] = (char) (cb += cp[2]);
+				cp[3] = (char) (ca += cp[3]);
 			} while ((int32) cc > 0);
 		} else  {
 			do {
@@ -318,9 +318,9 @@ horDiff8(TIFF* tif, tidata_t cp0, tsize_t cc)
 			int g2 = cp[1];
 			int b2 = cp[2];
 			do {
-				r1 = cp[3]; cp[3] = r1-r2; r2 = r1;
-				g1 = cp[4]; cp[4] = g1-g2; g2 = g1;
-				b1 = cp[5]; cp[5] = b1-b2; b2 = b1;
+				r1 = cp[3]; cp[3] = (char) (r1-r2); r2 = r1;
+				g1 = cp[4]; cp[4] = (char) (g1-g2); g2 = g1;
+				b1 = cp[5]; cp[5] = (char) (b1-b2); b2 = b1;
 				cp += 3;
 			} while ((int32)(cc -= 3) > 0);
 		} else if (stride == 4) {
@@ -330,10 +330,10 @@ horDiff8(TIFF* tif, tidata_t cp0, tsize_t cc)
 			int b2 = cp[2];
 			int a2 = cp[3];
 			do {
-				r1 = cp[4]; cp[4] = r1-r2; r2 = r1;
-				g1 = cp[5]; cp[5] = g1-g2; g2 = g1;
-				b1 = cp[6]; cp[6] = b1-b2; b2 = b1;
-				a1 = cp[7]; cp[7] = a1-a2; a2 = a1;
+				r1 = cp[4]; cp[4] = (char) (r1-r2); r2 = r1;
+				g1 = cp[5]; cp[5] = (char) (g1-g2); g2 = g1;
+				b1 = cp[6]; cp[6] = (char) (b1-b2); b2 = b1;
+				a1 = cp[7]; cp[7] = (char) (a1-a2); a2 = a1;
 				cp += 4;
 			} while ((int32)(cc -= 4) > 0);
 		} else {
@@ -428,7 +428,7 @@ PredictorVGetField(TIFF* tif, ttag_t tag, va_list ap)
 
 	switch (tag) {
 	case TIFFTAG_PREDICTOR:
-		*va_arg(ap, uint16*) = sp->predictor;
+		*va_arg(ap, uint16*) = (uint16) sp->predictor;
 		break;
 	default:
 		return (*sp->vgetparent)(tif, tag, ap);

@@ -113,7 +113,7 @@ static void _TIFFvoid(TIFF* tif) { (void) tif; }
 int
 TIFFSetCompressionScheme(TIFF* tif, int scheme)
 {
-	const TIFFCodec *c = TIFFFindCODEC(scheme);
+	const TIFFCodec *c = TIFFFindCODEC((uint16) scheme);
 
 	if (!c) {
 		TIFFError(tif->tif_name,

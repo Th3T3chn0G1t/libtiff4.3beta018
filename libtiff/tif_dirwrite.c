@@ -285,7 +285,7 @@ TIFFWriteDirectory(TIFF* tif)
 			 */
 			if (dir->tdir_count > 0) {
 				tif->tif_flags |= TIFF_INSUBIFD;
-				tif->tif_nsubifd = dir->tdir_count;
+				tif->tif_nsubifd = (uint16) dir->tdir_count;
 				if (dir->tdir_count > 1)
 					tif->tif_subifdoff = dir->tdir_offset;
 				else
@@ -370,7 +370,7 @@ TIFFWriteNormalTag(TIFF* tif, TIFFDirEntry* dir, const TIFFFieldInfo* fip)
 {
 	u_short wc = (u_short) fip->field_writecount;
 
-	dir->tdir_tag = fip->field_tag;
+	dir->tdir_tag = (uint16) fip->field_tag;
 	dir->tdir_type = (u_short) fip->field_type;
 	dir->tdir_count = wc;
 #define	WRITEF(x,y)	x(tif, fip->field_type, fip->field_tag, dir, wc, y)
@@ -488,7 +488,7 @@ TIFFWriteNormalTag(TIFF* tif, TIFFDirEntry* dir, const TIFFFieldInfo* fip)
 static void
 TIFFSetupShortLong(TIFF* tif, ttag_t tag, TIFFDirEntry* dir, uint32 v)
 {
-	dir->tdir_tag = tag;
+	dir->tdir_tag = (uint16) tag;
 	dir->tdir_count = 1;
 	if (v > 0xffffL) {
 		dir->tdir_type = (short) TIFF_LONG;
@@ -588,7 +588,7 @@ TIFFWriteShortTable(TIFF* tif,
 {
 	uint32 i, off;
 
-	dir->tdir_tag = tag;
+	dir->tdir_tag = (uint16) tag;
 	dir->tdir_type = (short) TIFF_SHORT;
 	/* XXX -- yech, fool TIFFWriteData */
 	dir->tdir_count = (uint32) (1L<<tif->tif_dir.td_bitspersample);
@@ -623,7 +623,7 @@ static int
 TIFFWriteShortArray(TIFF* tif,
     TIFFDataType type, ttag_t tag, TIFFDirEntry* dir, uint32 n, uint16* v)
 {
-	dir->tdir_tag = tag;
+	dir->tdir_tag = (uint16) tag;
 	dir->tdir_type = (short) type;
 	dir->tdir_count = n;
 	if (n <= 2) {
@@ -649,7 +649,7 @@ static int
 TIFFWriteLongArray(TIFF* tif,
     TIFFDataType type, ttag_t tag, TIFFDirEntry* dir, uint32 n, uint32* v)
 {
-	dir->tdir_tag = tag;
+	dir->tdir_tag = (uint16) tag;
 	dir->tdir_type = (short) type;
 	dir->tdir_count = n;
 	if (n == 1) {
@@ -671,7 +671,7 @@ TIFFWriteRationalArray(TIFF* tif,
 	uint32* t;
 	int status;
 
-	dir->tdir_tag = tag;
+	dir->tdir_tag = (uint16) tag;
 	dir->tdir_type = (short) type;
 	dir->tdir_count = n;
 	t = (uint32*) _TIFFmalloc(2*n * sizeof (uint32));
@@ -694,7 +694,7 @@ TIFFWriteRationalArray(TIFF* tif,
 			while (fv < 1L<<(31-3) && den < 1L<<(31-3))
 				fv *= 1<<3, den *= 1L<<3;
 		}
-		t[2*i+0] = sign * (fv + 0.5);
+		t[2*i+0] = (uint32) (sign * (fv + 0.5));
 		t[2*i+1] = den;
 	}
 	status = TIFFWriteData(tif, dir, (char *)t);
@@ -706,7 +706,7 @@ static int
 TIFFWriteFloatArray(TIFF* tif,
     TIFFDataType type, ttag_t tag, TIFFDirEntry* dir, uint32 n, float* v)
 {
-	dir->tdir_tag = tag;
+	dir->tdir_tag = (uint16) tag;
 	dir->tdir_type = (short) type;
 	dir->tdir_count = n;
 	TIFFCvtNativeToIEEEFloat(tif, n, v);
@@ -721,7 +721,7 @@ static int
 TIFFWriteDoubleArray(TIFF* tif,
     TIFFDataType type, ttag_t tag, TIFFDirEntry* dir, uint32 n, double* v)
 {
-	dir->tdir_tag = tag;
+	dir->tdir_tag = (uint16) tag;
 	dir->tdir_type = (short) type;
 	dir->tdir_count = n;
 	TIFFCvtNativeToIEEEDouble(tif, n, v);
@@ -753,7 +753,7 @@ TIFFWriteAnyArray(TIFF* tif,
 		{ unsigned char* bp = (unsigned char*) w;
 		  for (i = 0; i < n; i++)
 			bp[i] = (unsigned char) v[i];
-		  dir->tdir_tag = tag;
+		  dir->tdir_tag = (uint16) tag;
 		  dir->tdir_type = (short) type;
 		  dir->tdir_count = n;
 		  if (!TIFFWriteByteArray(tif, dir, (char*) bp))
@@ -764,7 +764,7 @@ TIFFWriteAnyArray(TIFF* tif,
 		{ signed char* bp = (signed char*) w;
 		  for (i = 0; i < n; i++)
 			bp[i] = (signed char) v[i];
-		  dir->tdir_tag = tag;
+		  dir->tdir_tag = (uint16) tag;
 		  dir->tdir_type = (short) type;
 		  dir->tdir_count = n;
 		  if (!TIFFWriteByteArray(tif, dir, (char*) bp))

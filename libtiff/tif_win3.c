@@ -28,18 +28,64 @@
  * TIFF Library Windows 3.x-specific Routines.
  */
 #include "tiffiop.h"
+
+/*
+ * TODO: Put these common rising/falling edges from `std.h' into a separate
+ * 		 Header for including in vendor code.
+ */
+
+#ifdef _WIN32
+# ifndef _CRT_SECURE_NO_WARNINGS
+#  define _CRT_SECURE_NO_WARNINGS
+# endif
+# ifndef _CRT_NONSTDC_NO_WARNINGS
+#  define _CRT_NONSTDC_NO_WARNINGS
+# endif
+#endif
+
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable: 4668) /* Symbol not defined as macro. */
+#endif
+
 #if defined(__WATCOMC__) || defined(__BORLANDC__) || defined(_MSC_VER)
-#include <io.h>		/* for open, close, etc. function prototypes */
+# include <io.h>		/* for open, close, etc. function prototypes */
 #endif
 
 #include <windows.h>
 #include <windowsx.h>
 #include <memory.h>
 
+/* TODO: Is this era-accurate for `off_t'? */
+#include <sys/types.h>
+
+/* TODO: Put this somewhere more sensible. */
+typedef u_int64 tptr_t;
+
+#ifdef _WIN32
+# undef _CRT_SECURE_NO_WARNINGS
+# undef _CRT_NONSTDC_NO_WARNINGS
+#endif
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
+
 static tsize_t 
 _tiffReadProc(thandle_t fd, tdata_t buf, tsize_t size)
 {
-	return (_hread(fd, buf, size));
+	/*
+	 * TODO: This spams `GetLastError()' ->
+	 * 				50 (Not supported)
+	 * 				183 (Cannot create existing file)
+	 *		 This function might just be unequivocally broken on modern
+	 *		 Windows.
+	 */
+	long ret = (_hread(fd, buf, size));
+
+	printf("_hread(%i, %p, %ld) -> %ld %ld %s\n", fd, buf, size, ret, GetLastError(), strerror(errno));
+
+	return ret;
 }
 
 static tsize_t
@@ -72,12 +118,19 @@ _tiffSizeProc(thandle_t fd)
 static int
 _tiffMapProc(thandle_t fd, tdata_t* pbase, toff_t* psize)
 {
+	(void) fd;
+	(void) pbase;
+	(void) psize;
+
 	return (0);
 }
 
 static void
 _tiffUnmapProc(thandle_t fd, tdata_t base, toff_t size)
 {
+	(void) fd;
+	(void) base;
+	(void) size;
 }
 
 /*
@@ -89,7 +142,7 @@ TIFFFdOpen(int fd, const char* name, const char* mode)
 	TIFF* tif;
 
 	tif = TIFFClientOpen(name, mode,
-	    (void*) fd,
+	    fd,
 	    _tiffReadProc, _tiffWriteProc, _tiffSeekProc, _tiffCloseProc,
 	    _tiffSizeProc, _tiffMapProc, _tiffUnmapProc);
 	if (tif)
@@ -151,13 +204,14 @@ _TIFFmemset(tdata_t p, int v, tsize_t c)
 	char* pp = (char*) p;
 
 	while (c > 0) {
-		tsize_t chunk = 0x10000 - ((uint32) pp & 0xffff);/* What's left in segment */
+		/* What's left in segment */
+		tsize_t chunk = 0x10000 - ((tptr_t) pp & 0xffff);
 		if (chunk > 0xff00)				/* No more than 0xff00 */
 			chunk = 0xff00;
 		if (chunk > c)					/* No more than needed */
 			chunk = c;
 		memset(pp, v, chunk);
-		pp = (char*) (chunk + (char huge*) pp);
+		pp = (char*) (chunk + (char _huge*) pp);
 		c -= chunk;
 	}
 }
@@ -180,8 +234,8 @@ _TIFFmemcmp(const tdata_t d, const tdata_t s, tsize_t c)
 	int result;
 
 	while (c > 0) {
-		chunks = 0x10000 - ((uint32) ss & 0xffff);	/* What's left in segment */
-		chunkd = 0x10000 - ((uint32) dd & 0xffff);	/* What's left in segment */
+		chunks = 0x10000 - ((tptr_t) ss & 0xffff); /* What's left in segment */
+		chunkd = 0x10000 - ((tptr_t) dd & 0xffff); /* What's left in segment */
 		chunk = c;					/* Get the largest of     */
 		if (chunk > chunks)				/*   c, chunks, chunkd,   */
 			chunk = chunks;				/*   0xff00               */
@@ -192,8 +246,8 @@ _TIFFmemcmp(const tdata_t d, const tdata_t s, tsize_t c)
 		result = memcmp(dd, ss, chunk);
 		if (result != 0)
 			return (result);
-		dd = (char*) (chunk + (char huge*) dd);
-		ss = (char*) (chunk + (char huge*) ss);
+		dd = (char*) (chunk + (char _huge*) dd);
+		ss = (char*) (chunk + (char _huge*) ss);
 		c -= chunk;
 	}
 	return (0);

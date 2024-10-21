@@ -65,7 +65,10 @@
 # define	BSDTYPES
 #endif
 
-#if defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows)
+#if defined(_WINDOWS) || \
+		defined(__WIN32__) ||  \
+		defined(_Windows) ||   \
+		defined(_WIN32)
 # define	BSDTYPES
 #endif
 
@@ -133,6 +136,10 @@ typedef double dblparam_t;
 # if __has_attribute(fallthrough)
 #  define FALLTHROUGH __attribute__((fallthrough))
 # endif
+#endif
+
+#ifndef FALLTHROUGH
+# define FALLTHROUGH
 #endif
 
 /*
