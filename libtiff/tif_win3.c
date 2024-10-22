@@ -81,9 +81,18 @@ _tiffReadProc(thandle_t fd, tdata_t buf, tsize_t size)
 	 *		 This function might just be unequivocally broken on modern
 	 *		 Windows.
 	 */
-	long ret = (_hread(fd, buf, size));
+	/* long ret = (_hread(fd, buf, size)); */
 
-	printf("_hread(%i, %p, %ld) -> %ld %ld %s\n", fd, buf, size, ret, GetLastError(), strerror(errno));
+	int ret;
+
+	errno = 0;
+	ret = _read(fd, buf, size);
+
+	/* TODO: Add IO tracing to all of AGA under verbose mode. */
+	/*printf(
+			"_read(%i, %p, %ld) -> "
+			"ret: %i, GetLastError(): %ld, errno: %s\n",
+			fd, buf, size, ret, GetLastError(), strerror(errno));*/
 
 	return ret;
 }
@@ -91,19 +100,54 @@ _tiffReadProc(thandle_t fd, tdata_t buf, tsize_t size)
 static tsize_t
 _tiffWriteProc(thandle_t fd, tdata_t buf, tsize_t size)
 {
-	return (_hwrite(fd, buf, size));
+	/*return (_hwrite(fd, buf, size));*/
+
+	int ret;
+
+	errno = 0;
+	ret = _write(fd, buf, size);
+
+	/*printf(
+			"_write(%i, %p, %ld) -> "
+			"ret: %i, GetLastError(): %ld, errno: %s\n",
+			fd, buf, size, ret, GetLastError(), strerror(errno));*/
+
+	return ret;
 }
 
 static toff_t
 _tiffSeekProc(thandle_t fd, toff_t off, int whence)
 {
-	return (_llseek(fd, (off_t) off, whence));
+	int ret;
+
+	errno = 0;
+	ret = _lseek(fd, (off_t) off, whence);
+
+	/*printf(
+			"_lseek(%i, %ld, %i) -> "
+			"ret: %i, GetLastError(): %ld, errno: %s\n",
+			fd, off, whence, ret, GetLastError(), strerror(errno));*/
+
+	return ret;
+	/*return (_llseek(fd, (off_t) off, whence));*/
 }
 
 static int
 _tiffCloseProc(thandle_t fd)
 {
-	return (_lclose(fd));
+	HFILE ret;
+
+	errno = 0;
+	ret = _close(fd);
+
+	/*printf(
+			"_close(%i) -> "
+			"ret: %i, GetLastError(): %ld, errno: %s\n",
+			fd, ret, GetLastError(), strerror(errno));*/
+
+	return ret;
+
+	/*return (_lclose(fd));*/
 }
 
 #include <sys/stat.h>
@@ -112,7 +156,17 @@ static toff_t
 _tiffSizeProc(thandle_t fd)
 {
 	struct stat sb;
-	return (fstat((int) fd, &sb) < 0 ? 0 : sb.st_size);
+	int ret;
+
+	errno = 0;
+	ret = fstat((int) fd, &sb);
+
+	/*printf(
+			"fstat(%i, &statbuf) -> "
+			"ret: %i, GetLastError(): %ld, errno: %s\n",
+			fd, ret, GetLastError(), strerror(errno));*/
+
+	return ret < 0 ? 0 : sb.st_size;
 }
 
 static int
