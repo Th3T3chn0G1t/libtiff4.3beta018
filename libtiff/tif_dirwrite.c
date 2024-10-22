@@ -953,7 +953,11 @@ TIFFLinkDirectory(TIFF* tif)
 		 */
 		tif->tif_header.tiff_diroff = diroff;
 #if defined(_WIN64)
-# define	HDROFF(f)	((toff_t) (u_int64) &(((TIFFHeader*) 0)->f))
+# ifdef _MSC_VER
+#  define	HDROFF(f)	((toff_t) (unsigned __int64) &(((TIFFHeader*) 0)->f))
+# else
+#  define	HDROFF(f)	((toff_t) (u_int64) &(((TIFFHeader*) 0)->f))
+#endif
 #else
 # define	HDROFF(f)	((toff_t) (u_long) &(((TIFFHeader*) 0)->f))
 #endif

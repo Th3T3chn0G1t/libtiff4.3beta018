@@ -60,7 +60,15 @@
 #include <sys/types.h>
 
 /* TODO: Put this somewhere more sensible. */
+#ifdef _WIN64
+# ifdef _MSC_VER
+typedef unsigned __int64 tptr_t;
+# else
 typedef u_int64 tptr_t;
+# endif
+#else
+typedef u_long tptr_t;
+#endif
 
 #ifdef _WIN32
 # undef _CRT_SECURE_NO_WARNINGS
