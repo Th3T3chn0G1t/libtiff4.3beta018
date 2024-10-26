@@ -59,7 +59,7 @@
 /* TODO: Is this era-accurate for `off_t'? */
 #include <sys/types.h>
 
-/* TODO: Put this somewhere more sensible. */
+/* TODO: Use asys for all tiff IO. */
 #ifdef _WIN64
 # ifdef _MSC_VER
 typedef unsigned __int64 tptr_t;
