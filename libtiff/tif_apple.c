@@ -130,7 +130,7 @@ _tiffSizeProc(thandle_t fd)
  * Open a TIFF file descriptor for read/writing.
  */
 TIFF*
-TIFFFdOpen(int fd, const char* name, const char* mode)
+TIFFFdOpen(thandle_t fd, const char* name, const char* mode)
 {
 	TIFF* tif;
 
@@ -182,7 +182,7 @@ TIFFOpen(const char* name, const char* mode)
 			goto badOpen;
 		break;
 	}
-	return (TIFFFdOpen((int) fref, name, mode));
+	return (TIFFFdOpen(fref, name, mode));
 badCreate:
 	TIFFError(module, "%s: Cannot create", name);
 	return ((TIFF*) 0);

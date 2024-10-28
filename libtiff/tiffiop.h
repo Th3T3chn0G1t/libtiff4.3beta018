@@ -82,10 +82,10 @@ typedef	uint32 (*TIFFStripMethod)(TIFF*, uint32);
 typedef	void (*TIFFTileMethod)(TIFF*, uint32*, uint32*);
 
 struct tiff {
-	char*		tif_name;	/* name of open file */
-	int		tif_fd;		/* open file descriptor */
-	int		tif_mode;	/* open mode (O_*) */
-	uint32		tif_flags;
+	char* tif_name; /* name of open file */
+	thandle_t tif_fd; /* open file descriptor */
+	int tif_mode; /* open mode (O_*) */
+	uint32 tif_flags;
 #define	TIFF_FILLORDER		0x0003	/* natural bit fill order for machine */
 #define	TIFF_DIRTYHEADER	0x0004	/* header must be written on close */
 #define	TIFF_DIRTYDIRECT	0x0008	/* current directory must be written */

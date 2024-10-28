@@ -62,17 +62,27 @@ typedef	uint16 tsample_t;	/* sample number */
 typedef	uint32 tstrip_t;	/* strip number */
 typedef uint32 ttile_t;		/* tile number */
 typedef	int32 tsize_t;		/* i/o size in bytes */
-#if defined(_WINDOWS) || \
-		defined(__WIN32__) ||  \
-		defined(_Windows) ||   \
+
+#if defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows) || \
 		defined(_WIN32)
-#include <windows.h>
-typedef	HFILE thandle_t;	/* client data handle */
+
+# include <windows.h>
+# define TIFF_IO_WIN3
+typedef	HFILE thandle_t;
+/*
+ * TODO: Temporarily disabled.
 #elif defined(unix) || defined(__unix)
-typedef	int thandle_t;	/* client data handle */
+# define TIFF_IO_UNIX
+typedef	int thandle_t;
+ */
+#elif defined(__STDC__)
+# include <stdio.h>
+# define TIFF_IO_STDC
+typedef	FILE* thandle_t;
 #else
-typedef	void* thandle_t;	/* client data handle */
+typedef	void* thandle_t;
 #endif
+
 typedef	void* tdata_t;		/* image data ref */
 typedef	int32 toff_t;		/* file offset */
 
@@ -258,7 +268,7 @@ extern	int TIFFRGBAImageBegin(TIFFRGBAImage*, TIFF*, int, char [1024]);
 extern	int TIFFRGBAImageGet(TIFFRGBAImage*, uint32*, uint32, uint32);
 extern	void TIFFRGBAImageEnd(TIFFRGBAImage*);
 extern	TIFF* TIFFOpen(const char*, const char*);
-extern	TIFF* TIFFFdOpen(int, const char*, const char*);
+extern	TIFF* TIFFFdOpen(thandle_t, const char*, const char*);
 extern	TIFF* TIFFClientOpen(const char*, const char*,
 	    thandle_t,
 	    TIFFReadWriteProc, TIFFReadWriteProc,

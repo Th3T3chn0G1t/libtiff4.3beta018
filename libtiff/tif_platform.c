@@ -24,8 +24,12 @@
  * OF THIS SOFTWARE.
  */
 
-#ifdef _WIN32
+#include <tiffio.h>
+
+#ifdef TIFF_IO_WIN3
 # include "tif_win3.c"
-#else
+#elif defined(TIFF_IO_UNIX)
 # include "tif_unix.c"
+#elif defined(TIFF_IO_STDC)
+# include "tif_stdc.c"
 #endif

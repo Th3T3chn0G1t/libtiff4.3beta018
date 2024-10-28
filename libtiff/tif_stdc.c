@@ -1,4 +1,4 @@
-/* $Header: /usr/people/sam/tiff/libtiff/RCS/tif_msdos.c,v 1.13 1995/06/06 23:49:31 sam Exp $ */
+/* $Header: /usr/people/sam/tiff/libtiff/RCS/tif_unix.c,v 1.15 1995/06/06 23:49:31 sam Exp $ */
 
 /*
  * Copyright (c) 1988-1995 Sam Leffler
@@ -25,57 +25,85 @@
  */
 
 /*
- * TIFF Library MSDOS-specific Routines.
+ * TIFF Library UNIX-specific Routines.
  */
-#if defined(__WATCOMC__) || defined(__BORLANDC__) || defined(_MSC_VER)
-#include <io.h>		/* for open, close, etc. function prototypes */
-#include <stdio.h>
-#endif
 #include "tiffiop.h"
 
-static tsize_t 
+#include <stdio.h>
+#include <stdlib.h>
+
+static tsize_t
 _tiffReadProc(thandle_t fd, tdata_t buf, tsize_t size)
 {
-	return (read((int) fd, buf, size));
+	return ((tsize_t) fread(buf, 1, (size_t) size, fd));
 }
 
 static tsize_t
 _tiffWriteProc(thandle_t fd, tdata_t buf, tsize_t size)
 {
-	return (write((int) fd, buf, size));
+	return ((tsize_t) fwrite(buf, 1, (size_t) size, fd));
 }
 
 static toff_t
 _tiffSeekProc(thandle_t fd, toff_t off, int whence)
 {
-	return (lseek((int) fd, (off_t) off, whence));
+	fseek(fd, (long) off, whence);
+
+	return (toff_t) ftell(fd);
 }
 
 static int
 _tiffCloseProc(thandle_t fd)
 {
-	return (close((int) fd));
+	return (fclose(fd));
 }
-
-#include <sys/stat.h>
 
 static toff_t
 _tiffSizeProc(thandle_t fd)
 {
-	struct stat sb;
-	return (fstat((int) fd, &sb) < 0 ? 0 : sb.st_size);
+	fseek(fd, SEEK_END, 0);
+
+	return (off_t) ftell(fd);
 }
+
+#ifdef HAVE_MMAP
+#include <sys/mman.h>
 
 static int
 _tiffMapProc(thandle_t fd, tdata_t* pbase, toff_t* psize)
 {
+	toff_t size = _tiffSizeProc(fd);
+	if (size != (toff_t) -1) {
+		*pbase = (tdata_t)
+		    mmap(0, size, PROT_READ, MAP_SHARED, (int) fd, 0);
+		if (*pbase != (tdata_t) -1) {
+			*psize = size;
+			return (1);
+		}
+	}
 	return (0);
 }
 
 static void
 _tiffUnmapProc(thandle_t fd, tdata_t base, toff_t size)
 {
+	(void) fd;
+	(void) munmap(base, (off_t) size);
 }
+#else /* !HAVE_MMAP */
+static int
+_tiffMapProc(thandle_t fd, tdata_t* pbase, toff_t* psize)
+{
+	(void) fd; (void) pbase; (void) psize;
+	return (0);
+}
+
+static void
+_tiffUnmapProc(thandle_t fd, tdata_t base, toff_t size)
+{
+	(void) fd; (void) base; (void) size;
+}
+#endif /* !HAVE_MMAP */
 
 /*
  * Open a TIFF file descriptor for read/writing.
@@ -86,9 +114,10 @@ TIFFFdOpen(thandle_t fd, const char* name, const char* mode)
 	TIFF* tif;
 
 	tif = TIFFClientOpen(name, mode,
-	    (void*) fd,
-	    _tiffReadProc, _tiffWriteProc, _tiffSeekProc, _tiffCloseProc,
-	    _tiffSizeProc, _tiffMapProc, _tiffUnmapProc);
+	    fd,
+	    _tiffReadProc, _tiffWriteProc,
+	    _tiffSeekProc, _tiffCloseProc, _tiffSizeProc,
+	    _tiffMapProc, _tiffUnmapProc);
 	if (tif)
 		tif->tif_fd = fd;
 	return (tif);
@@ -100,28 +129,17 @@ TIFFFdOpen(thandle_t fd, const char* name, const char* mode)
 TIFF*
 TIFFOpen(const char* name, const char* mode)
 {
-	static const char module[] = "TIFFOpen";
-	int m, fd;
+	thandle_t fp;
 
-	m = _TIFFgetMode(mode, module);
-	if (m == -1)
-		return ((TIFF*)0);
-	fd = open(name, m|O_BINARY, 0666);
-	if (fd < 0) {
-		TIFFError(module, "%s: Cannot open", name);
-		return ((TIFF*)0);
+	if(!(fp = fopen(name, mode))) {
+		TIFFError("TIFFOpen", "%s: Cannot open", name);
+		return ((TIFF*) 0);
 	}
-	return (TIFFFdOpen(fd, name, mode));
+
+	return (TIFFFdOpen(fp, name, mode));
 }
 
-#ifdef __GNUC__
-extern	char* malloc();
-extern	char* realloc();
-#else
-#include <malloc.h>
-#endif
-
-tdata_t
+void*
 _TIFFmalloc(tsize_t s)
 {
 	return (malloc((size_t) s));
@@ -133,7 +151,7 @@ _TIFFfree(tdata_t p)
 	free(p);
 }
 
-tdata_t
+void*
 _TIFFrealloc(tdata_t p, tsize_t s)
 {
 	return (realloc(p, (size_t) s));
@@ -158,7 +176,7 @@ _TIFFmemcmp(const tdata_t p1, const tdata_t p2, tsize_t c)
 }
 
 static void
-msdosWarningHandler(const char* module, const char* fmt, va_list ap)
+unixWarningHandler(const char* module, const char* fmt, va_list ap)
 {
 	if (module != NULL)
 		fprintf(stderr, "%s: ", module);
@@ -166,14 +184,14 @@ msdosWarningHandler(const char* module, const char* fmt, va_list ap)
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, ".\n");
 }
-TIFFErrorHandler _TIFFwarningHandler = msdosWarningHandler;
+TIFFErrorHandler _TIFFwarningHandler = unixWarningHandler;
 
 static void
-msdosErrorHandler(const char* module, const char* fmt, va_list ap)
+unixErrorHandler(const char* module, const char* fmt, va_list ap)
 {
 	if (module != NULL)
 		fprintf(stderr, "%s: ", module);
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, ".\n");
 }
-TIFFErrorHandler _TIFFerrorHandler = msdosErrorHandler;
+TIFFErrorHandler _TIFFerrorHandler = unixErrorHandler;
