@@ -320,7 +320,7 @@ TIFFFileName(TIFF* tif)
 /*
  * Return open file's I/O descriptor.
  */
-int
+thandle_t
 TIFFFileno(TIFF* tif)
 {
 	return (tif->tif_fd);

@@ -69,12 +69,9 @@ typedef	int32 tsize_t;		/* i/o size in bytes */
 # include <windows.h>
 # define TIFF_IO_WIN3
 typedef	HFILE thandle_t;
-/*
- * TODO: Temporarily disabled.
 #elif defined(unix) || defined(__unix)
 # define TIFF_IO_UNIX
 typedef	int thandle_t;
- */
 #elif defined(__STDC__)
 # include <stdio.h>
 # define TIFF_IO_STDC
@@ -232,7 +229,7 @@ extern	tsize_t TIFFTileSize(TIFF*);
 extern	tsize_t TIFFVTileSize(TIFF*, uint32);
 extern	uint32 TIFFDefaultStripSize(TIFF*, uint32);
 extern	void TIFFDefaultTileSize(TIFF*, uint32*, uint32*);
-extern	int TIFFFileno(TIFF*);
+extern	thandle_t TIFFFileno(TIFF*);
 extern	int TIFFGetMode(TIFF*);
 extern	int TIFFIsTiled(TIFF*);
 extern	int TIFFIsByteSwapped(TIFF*);
