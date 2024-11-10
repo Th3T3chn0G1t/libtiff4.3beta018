@@ -63,16 +63,16 @@ typedef	uint32 tstrip_t;	/* strip number */
 typedef uint32 ttile_t;		/* tile number */
 typedef	int32 tsize_t;		/* i/o size in bytes */
 
-#if defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows) || \
-		defined(_WIN32)
+#include <asys/base.h>
 
+#ifdef ASYS_WIN32
 # include <windows.h>
 # define TIFF_IO_WIN3
 typedef	HFILE thandle_t;
-#elif defined(unix) || defined(__unix)
+#elif defined(ASYS_UNIX)
 # define TIFF_IO_UNIX
 typedef	int thandle_t;
-#elif defined(__STDC__)
+#elif defined(ASYS_STDC)
 # include <stdio.h>
 # define TIFF_IO_STDC
 typedef	FILE* thandle_t;
