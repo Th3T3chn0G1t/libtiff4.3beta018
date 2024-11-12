@@ -27,6 +27,8 @@
 #ifndef _TIFFIO_
 #define	_TIFFIO_
 
+#include <asys/base.h>
+
 /*
  * TIFF I/O Library Definitions.
  */
@@ -66,7 +68,20 @@ typedef	int32 tsize_t;		/* i/o size in bytes */
 #include <asys/base.h>
 
 #ifdef ASYS_WIN32
+# ifndef _CRT_SECURE_NO_WARNINGS
+#  define _CRT_SECURE_NO_WARNINGS
+# endif
+# ifndef _CRT_NONSTDC_NO_WARNINGS
+#  define _CRT_NONSTDC_NO_WARNINGS
+# endif
+# ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4668) /* Symbol not defined as macro. */
+# endif
 # include <windows.h>
+# ifdef _MSC_VER
+#  pragma warning(pop)
+# endif
 # define TIFF_IO_WIN3
 typedef	HFILE thandle_t;
 #elif defined(ASYS_UNIX)
@@ -184,8 +199,7 @@ typedef struct {
 	TIFFInitMethod	init;
 } TIFFCodec;
 
-#include <stdio.h>
-#include <stdarg.h>
+#include <asys/system.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -250,12 +264,12 @@ extern	int TIFFSetField(TIFF*, ttag_t, ...);
 extern	int TIFFVSetField(TIFF*, ttag_t, va_list);
 extern	int TIFFWriteDirectory(TIFF *);
 #if defined(c_plusplus) || defined(__cplusplus)
-extern	void TIFFPrintDirectory(TIFF*, FILE*, long = 0);
+extern	void TIFFPrintDirectory(TIFF*, thandle_t, long = 0);
 extern	int TIFFReadScanline(TIFF*, tdata_t, uint32, tsample_t = 0);
 extern	int TIFFWriteScanline(TIFF*, tdata_t, uint32, tsample_t = 0);
 extern	int TIFFReadRGBAImage(TIFF*, uint32, uint32, uint32*, int = 0);
 #else
-extern	void TIFFPrintDirectory(TIFF*, FILE*, long);
+extern	void TIFFPrintDirectory(TIFF*, thandle_t, long);
 extern	int TIFFReadScanline(TIFF*, tdata_t, uint32, tsample_t);
 extern	int TIFFWriteScanline(TIFF*, tdata_t, uint32, tsample_t);
 extern	int TIFFReadRGBAImage(TIFF*, uint32, uint32, uint32*, int);

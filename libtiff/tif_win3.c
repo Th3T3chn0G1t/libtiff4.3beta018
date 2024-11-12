@@ -29,19 +29,12 @@
  */
 #include "tiffiop.h"
 
+#include <asys/log.h>
+
 /*
  * TODO: Put these common rising/falling edges from `std.h' into a separate
  * 		 Header for including in vendor code.
  */
-
-#ifdef _WIN32
-# ifndef _CRT_SECURE_NO_WARNINGS
-#  define _CRT_SECURE_NO_WARNINGS
-# endif
-# ifndef _CRT_NONSTDC_NO_WARNINGS
-#  define _CRT_NONSTDC_NO_WARNINGS
-# endif
-#endif
 
 #ifdef _MSC_VER
 # pragma warning(push)
@@ -94,12 +87,12 @@ _tiffReadProc(thandle_t fd, tdata_t buf, tsize_t size)
 	int ret;
 
 	errno = 0;
-	ret = _read(fd, buf, size);
+	ret = _hread(fd, buf, size);
 
 	/* TODO: Add IO tracing to all of AGA under verbose mode. */
-	/*printf(
-			"_read(%i, %p, %ld) -> "
-			"ret: %i, GetLastError(): %ld, errno: %s\n",
+	/*asys_log(
+			__FILE__,
+			"_hread(%i, %p, %ld) -> ret: %i, GetLastError(): %ld, errno: %s",
 			fd, buf, size, ret, GetLastError(), strerror(errno));*/
 
 	return ret;
@@ -113,11 +106,11 @@ _tiffWriteProc(thandle_t fd, tdata_t buf, tsize_t size)
 	int ret;
 
 	errno = 0;
-	ret = _write(fd, buf, size);
+	ret = _hwrite(fd, buf, size);
 
-	/*printf(
-			"_write(%i, %p, %ld) -> "
-			"ret: %i, GetLastError(): %ld, errno: %s\n",
+	/*asys_log(
+			__FILE__,
+			"_hwrite(%i, %p, %ld) -> ret: %i, GetLastError(): %ld, errno: %s",
 			fd, buf, size, ret, GetLastError(), strerror(errno));*/
 
 	return ret;
@@ -129,11 +122,11 @@ _tiffSeekProc(thandle_t fd, toff_t off, int whence)
 	int ret;
 
 	errno = 0;
-	ret = _lseek(fd, (off_t) off, whence);
+	ret = _llseek(fd, (off_t) off, whence);
 
-	/*printf(
-			"_lseek(%i, %ld, %i) -> "
-			"ret: %i, GetLastError(): %ld, errno: %s\n",
+	/*asys_log(
+			__FILE__,
+			"_llseek(%i, %ld, %i) -> ret: %i, GetLastError(): %ld, errno: %s",
 			fd, off, whence, ret, GetLastError(), strerror(errno));*/
 
 	return ret;
@@ -146,11 +139,11 @@ _tiffCloseProc(thandle_t fd)
 	HFILE ret;
 
 	errno = 0;
-	ret = _close(fd);
+	ret = _lclose(fd);
 
-	/*printf(
-			"_close(%i) -> "
-			"ret: %i, GetLastError(): %ld, errno: %s\n",
+	/*asys_log(
+			__FILE__,
+			"_close(%i) -> ret: %i, GetLastError(): %ld, errno: %s",
 			fd, ret, GetLastError(), strerror(errno));*/
 
 	return ret;
@@ -169,9 +162,9 @@ _tiffSizeProc(thandle_t fd)
 	errno = 0;
 	ret = fstat((int) fd, &sb);
 
-	/*printf(
-			"fstat(%i, &statbuf) -> "
-			"ret: %i, GetLastError(): %ld, errno: %s\n",
+	/*asys_log(
+			__FILE__,
+			"fstat(%i, &statbuf) -> ret: %i, GetLastError(): %ld, errno: %s",
 			fd, ret, GetLastError(), strerror(errno));*/
 
 	return ret < 0 ? 0 : sb.st_size;
