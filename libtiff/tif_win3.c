@@ -30,6 +30,7 @@
 #include "tiffiop.h"
 
 #include <asys/log.h>
+#include <asys/stream.h>
 
 /*
  * TODO: Put these common rising/falling edges from `std.h' into a separate
@@ -151,23 +152,21 @@ _tiffCloseProc(thandle_t fd)
 	/*return (_lclose(fd));*/
 }
 
-#include <sys/stat.h>
-
+/* TODO: Doesn't presently report errors? */
 static toff_t
 _tiffSizeProc(thandle_t fd)
 {
-	struct stat sb;
-	int ret;
+	enum asys_result result;
 
-	errno = 0;
-	ret = fstat((int) fd, &sb);
+	struct asys_stream stream;
+	union asys_file_attribute attribute;
 
-	/*asys_log(
-			__FILE__,
-			"fstat(%i, &statbuf) -> ret: %i, GetLastError(): %ld, errno: %s",
-			fd, ret, GetLastError(), strerror(errno));*/
+	stream.hfile = fd;
 
-	return ret < 0 ? 0 : sb.st_size;
+	result = asys_stream_attribute(&stream, ASYS_FILE_LENGTH, &attribute);
+	asys_log_result(__FILE__, "asys_stream_attribute", result);
+
+	return result ? 0 : attribute.length;
 }
 
 static int
